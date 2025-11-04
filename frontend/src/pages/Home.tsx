@@ -15,7 +15,8 @@ const Home: React.FC = () => {
 
   useEffect(() => {
     // Fetch dresses from backend API
-    fetch('http://localhost:5000/api/dresses')
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    fetch(`${apiUrl}/api/dresses`)
       .then((response) => response.json())
       .then((data) => {
         setDresses(data);
@@ -43,14 +44,11 @@ const Home: React.FC = () => {
 
     // Apply price range filter
     if (filters.priceRange) {
-      const [min, max] = filters.priceRange.split('-').map((v) => {
-        if (v.includes('+')) return [parseInt(v.replace('+', '')), Infinity];
-        return parseInt(v);
-      });
-      
-      if (Array.isArray(min)) {
-        filtered = filtered.filter((dress) => dress.price >= min[0]);
-      } else if (max) {
+      if (filters.priceRange.includes('+')) {
+        const min = parseInt(filters.priceRange.replace('+', ''));
+        filtered = filtered.filter((dress) => dress.price >= min);
+      } else {
+        const [min, max] = filters.priceRange.split('-').map((v) => parseInt(v));
         filtered = filtered.filter((dress) => dress.price >= min && dress.price <= max);
       }
     }
